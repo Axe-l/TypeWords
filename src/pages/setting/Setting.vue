@@ -637,7 +637,7 @@ function transferOk() {
             </PopConfirm>
           </div>
 
-          <template v-if="!isNewHost">
+          <template v-if="isNewHost">
             <div class="line my-3"></div>
             <div>请注意，如果本地已有使用记录，请先备份当前数据，迁移数据后将<b class="text-red"> 完全覆盖 </b>当前所有数据，请谨慎操作。
             </div>
