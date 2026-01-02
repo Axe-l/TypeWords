@@ -54,6 +54,7 @@ async function onSubmit() {
       //todo 可以检查的更准确些，比如json对比
       if (props.isAdd) {
         data.id = 'custom-dict-' + Date.now()
+        data.custom = true
         if (source.bookList.find(v => v.name === data.name)) {
           Toast.warning('已有相同名称！')
           return
@@ -78,15 +79,17 @@ async function onSubmit() {
         //任意修改，都将其变为自定义词典
         if (!data.custom && ![DictId.wordKnown, DictId.wordWrong, DictId.wordCollect, DictId.articleCollect].includes(data.en_name || data.id)) {
           data.custom = true
-          data.id += '_custom'
+          if (!data.id.includes('_custom')) {
+            data.id += '_custom'
+          }
         }
         runtimeStore.editDict = data
         if (rIndex > -1) {
-          source.bookList[rIndex] = cloneDeep(data)
+          source.bookList[rIndex] = getDefaultDict(data)
           emit('submit')
           Toast.success('修改成功')
         } else {
-          source.bookList.push(cloneDeep(data))
+          source.bookList.push(getDefaultDict(data))
           Toast.success('修改成功并加入我的词典')
         }
       }

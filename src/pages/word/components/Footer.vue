@@ -1,12 +1,13 @@
 <script setup lang="ts">
 
-import { inject, Ref, watch } from "vue"
+import { inject, Ref } from "vue"
 import { usePracticeStore } from "@/stores/practice.ts";
 import { useSettingStore } from "@/stores/setting.ts";
-import { PracticeData, WordPracticeType, ShortcutKey, TaskWords } from "@/types/types.ts";
+import { PracticeData, ShortcutKey } from "@/types/types.ts";
 import BaseIcon from "@/components/BaseIcon.vue";
 import Tooltip from "@/components/base/Tooltip.vue";
 import Progress from '@/components/base/Progress.vue'
+import SettingDialog from "@/components/setting/SettingDialog.vue";
 
 const statStore = usePracticeStore()
 const settingStore = useSettingStore()
@@ -50,7 +51,7 @@ function getStepStr(step: number) {
       str += `默写新词`
       break
     case 3:
-      str += `辨认上次学习`
+      str += `自测上次学习`
       break
     case 4:
       str += '听写上次学习'
@@ -59,7 +60,7 @@ function getStepStr(step: number) {
       str += '默写上次学习'
       break
     case 6:
-      str += '辨认之前学习'
+      str += '自测之前学习'
       break
     case 7:
       str += '听写之前学习'
@@ -95,10 +96,11 @@ const progress = $computed(() => {
     </Tooltip>
 
     <div class="bottom">
-      <Progress
-          :percentage="progress"
-          :stroke-width="8"
-          :show-text="false"/>
+      <Progress :percentage="progress"
+                :stroke-width="8"
+                color="#69b1ff"
+                :show-text="false"/>
+
       <div class="flex justify-between items-center">
         <div class="stat">
           <div class="row">
@@ -107,22 +109,25 @@ const progress = $computed(() => {
             <div class="name">{{ status }}</div>
           </div>
           <div class="row">
+<!--            <div class="num">{{ statStore.spend }}分钟</div>-->
+            <div class="num">{{ Math.floor(statStore.spend / 1000 / 60) }}分钟</div>
+            <div class="line"></div>
+            <div class="name">时间</div>
+          </div>
+          <div class="row">
             <div class="num">{{ statStore.total }}</div>
             <div class="line"></div>
             <div class="name">单词总数</div>
           </div>
           <div class="row">
-            <div class="num">{{ format(statStore.inputWordNumber, '', 0) }}</div>
-            <div class="line"></div>
-            <div class="name">总输入数</div>
-          </div>
-          <div class="row">
             <div class="num">{{ format(statStore.wrong, '', 0) }}</div>
             <div class="line"></div>
-            <div class="name">总错误数</div>
+            <div class="name">错误数</div>
           </div>
         </div>
         <div class="flex gap-2 justify-center items-center" id="toolbar-icons">
+          <SettingDialog type="word"/>
+
           <BaseIcon
               v-if="statStore.step < 9"
               @click="emit('skipStep')"
@@ -174,10 +179,13 @@ const progress = $computed(() => {
         </div>
       </div>
     </div>
-    <div class="progress-wrap">
+    <div class="progress-wrap flex gap-3 items-center color-gray">
+      <span class="shrink-0">{{ status }}</span>
       <Progress :percentage="progress"
                 :stroke-width="8"
+                color="#69b1ff"
                 :show-text="false"/>
+      <div class="num">{{ `${practiceData.index + 1}/${practiceData.words.length}` }}</div>
     </div>
   </div>
 </template>

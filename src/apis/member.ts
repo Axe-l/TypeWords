@@ -53,7 +53,15 @@ export function levelBenefits(params) {
 }
 
 export function orderCreate(params) {
-  return http<{ orderNo: string }>('/member/orderCreate', params, null, 'post')
+  return http<{ orderNo: string, result: string, }>('/member/orderCreate', params, null, 'post')
+}
+
+export function alipayQuery(params) {
+  return http('/member/alipayQuery', null, params, 'get')
+}
+
+export function testPay() {
+  return http('/member/testPay', null, null, 'get')
 }
 
 export function orderStatus(params) {

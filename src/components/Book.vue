@@ -10,10 +10,12 @@ interface IProps {
   showCheckbox?: boolean
   checked?: boolean
   showProgress?: boolean
+  isUser?: boolean //是否是用户的词典
 }
 
 const props = withDefaults(defineProps<IProps>(), {
-  showProgress: true
+  showProgress: true,
+  isUser: false
 })
 
 defineEmits<{
@@ -21,39 +23,40 @@ defineEmits<{
 }>()
 
 const progress = $computed(() => {
-  if (props.item?.complete) return 100
   return Number(((props.item?.lastLearnIndex / props.item?.length) * 100).toFixed())
 })
 
 const studyProgress = $computed(() => {
   if (!props.showProgress) return
-  if (props.item.complete) return props.item?.length + '/'
   return props.item?.lastLearnIndex ? props.item?.lastLearnIndex + '/' : ''
 })
 </script>
 
 <template>
-  <div class="book relative overflow-hidden" :id="item?.id ?? 'no-book'">
-    <template v-if="!isAdd">
-      <div>
-        <div class="text-base">{{ item?.name }}</div>
-        <div class="text-sm line-clamp-3" v-opacity="item.name !== item.description">{{ item?.description }}</div>
-      </div>
-      <div class="absolute bottom-4 right-3">
+  <div :id="item?.id" v-if="!isAdd">
+    <div class="book overflow-hidden relative">
+      <img class="absolute top-0 left-0 w-full object-cover" v-if="item?.cover" :src='item.cover' alt=""/>
+      <div class="text-base mt-1" v-else>{{ item?.name }}</div>
+      <div class="absolute bottom-4 right-3 z-1" :class="item?.cover && 'color-white'">
         <div>{{ studyProgress }}{{ item?.length }}{{ quantifier }}</div>
       </div>
       <div class="absolute bottom-2 left-3 right-3">
-        <Progress v-if="(item?.lastLearnIndex || item.complete) && showProgress" class="mt-1"
+        <Progress v-if="(item?.lastLearnIndex) && showProgress" class="mt-1"
                   :percentage="progress"
                   :show-text="false"></Progress>
       </div>
       <Checkbox v-if="showCheckbox"
                 :model-value="checked"
                 @change="$emit('check')"
-                class="absolute left-3 bottom-3"/>
-      <div class="custom" v-if="item.custom">自定义</div>
-    </template>
-    <div v-else class="center h-full text-2xl">
+                class="absolute left-3 bottom-3 z-2"/>
+      <div class="custom z-1" v-if="item.custom">自定义</div>
+      <div class="custom bg-red! color-white z-1" v-else-if="item.update">更新中</div>
+<!--      <div class="sync bg-red! color-white z-1" v-if="!item.sync && isUser && !showCheckbox">未同步</div>-->
+    </div>
+    <div class="text-base mt-1" v-if="item?.cover">{{ item?.name }}</div>
+  </div>
+  <div v-else class="book" id="no-book">
+    <div class="h-full center text-2xl">
       <IconFluentAdd16Regular/>
     </div>
   </div>
@@ -68,5 +71,13 @@ const studyProgress = $computed(() => {
   background: var(--color-label-bg);
   font-size: 11px;
   transform: rotate(45deg);
+}
+
+.sync {
+  @extend .custom;
+  bottom: 4px;
+  left: -22px;
+  top: unset;
+  right: unset;
 }
 </style>
